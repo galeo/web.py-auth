@@ -1,0 +1,70 @@
+$def with (done=False)
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Password reset</title>
+<style type="text/css">
+/* <![CDATA[ */
+body {
+  background: white;
+  color: black;
+  font-family: "Lucida Grande", "Lucida Sans Unicode", Tahoma, Verdana, sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  color: #333;
+}
+h1 {
+  font-weight: normal;
+  font-size: 28px;
+  font-family: Georgia, "Times New Roman", serif;
+  margin: 0 0 20px 0;
+  padding: 0;
+  text-align: center;
+  color: black;
+}
+p { margin:0 0 18px; }
+p.submit { text-align: center; padding: 10px 0 0 0; }
+label { cursor:pointer; font-size: 13px; }
+input {
+  border: 1px solid #B2B2B2;
+  color: black;
+  margin: 8px 1px 1px 1px;
+  padding: 5px 4px;
+  width: 290px;
+  font-size: 28px;
+  font-family: Georgia, "Times New Roman", serif;
+}
+button {
+  padding: 5px 10px;
+  font-size: 14px;
+}
+#container {
+  margin: 0 auto;
+  position: relative;
+  top: 30px;
+  width: 300px;
+  padding: 30px 20px;
+  background: #eee;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  -moz-border-radius: 6px;
+  -webkit-border-radius: 6px;
+}
+/* ]]> */
+</style>
+</head>
+<body>
+<div id="container">
+  <h1>Password reset</h1>
+  $if done:
+      <p>We have sent you an email with a link to reset your password.</p>
+      <p>Please, check your email.</p>
+  $else:
+      <p>Please, enter your username or email address and we will send you a link to reset your password.</p>
+      <form action="" method="post" accept-charset="UTF-8">
+        <p><input type="text" name="login" maxlength="254" tabindex="1" /></p>
+        <p class="submit"><button type="submit">Send</button></p>
+      </form>
+</div>
+</body>
