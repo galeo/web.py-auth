@@ -1,5 +1,6 @@
-# −*− coding: UTF−8 −*−
+# −*− coding: utf−8 −*−
 """
+Template pages.
 """
 
 import web
@@ -8,7 +9,8 @@ from time import sleep
 
 class AuthError(Exception): pass
 
-render = web.template.render('web/contrib/auth/templates/')
+# Will mapping to local templates path
+render = web.template.render('templates/')
 
 def loginForm(auth):
     auth_error = auth.session.get('auth_error', '')
@@ -16,13 +18,17 @@ def loginForm(auth):
         del auth.session['auth_error']
     form = web.template.Template('''
     <form action="%s" method="post" accept-charset="utf-8">
-      <p><label for="login">Username:
-      <input type="text" name="login" id="login" maxlength="254" tabindex="1" />
-      </label></p>
-      <p><label for="password">Password:
-      <input type="password" name="password" id="password" maxlength="254" tabindex="2" />
-      </label></p>
-      <p class="submit"><button type="submit">Log in</button></p>
+      <p>
+        <label for="login">Username:</label>
+        <input type="text" name="login" id="login" maxlength="254" tabindex="1" />
+      </p>
+      <p>
+        <label for="password">Password:</label>
+        <input type="password" name="password" id="password" maxlength="254" tabindex="2" />
+      </p>
+      <p class="submit">
+        <button type="submit">Log in</button>
+      </p>
     </form>
     ''' % (auth.config.url_login,))
     form.auth_error = auth_error
@@ -83,14 +89,15 @@ def resetTokenPOST(auth, email_template=None):
     i = web.input()
     login = i.get('login', '').strip()
     try:
-        if not login:
-            raise AuthError
-        user = auth._db.select('user',
-            where = '$login = user_login OR $login = ' + auth.config.db_email_field,
-            vars = {'login': login}
-        )
-        if not len(user):
-            raise AuthError
+        if not login: raise AuthError
+        
+        query_where = web.db.sqlwhere({
+                'user_login': login,
+                auth.config.db_email_field: login
+                }, ' OR ')
+        user = auth._db.select('user', where=query_where).list()
+        if not user: raise AuthError
+        
         user = user[0]
 
         from_address = auth.config.email_from
@@ -100,8 +107,7 @@ def resetTokenPOST(auth, email_template=None):
             web.ctx.home,
             auth.config.url_reset_change,
             user.user_id,
-            token
-        )
+            token)
         print token_url
         message = template(token_url)
         subject = message.get('Subject', 'Password reset').strip()
@@ -113,6 +119,7 @@ def resetTokenPOST(auth, email_template=None):
         web.utils.sendmail(from_address, to_address, subject, str(message), headers)
     except (AuthError, IOError):
         pass
+    
     auth.session.auth_token_sent = True
     web.found(web.ctx.path)
 
@@ -123,11 +130,10 @@ def resetChangeGET(auth, uid, token, template=None):
     template = template or auth.config.template_reset_change or render.reset_change
     try:
         user = auth._db.select('user',
-            where = 'user_id = $uid',
-            vars = {'uid': uid}
-        )
-        if not len(user) \
-          or not tokens.check_token(user[0], token, auth.config.reset_expire_after):
+                               where = 'user_id = $uid',
+                               vars = {'uid': uid}).list()
+        if not user or \
+                not tokens.check_token(user[0], token, auth.config.reset_expire_after):
             raise AuthError
     except AuthError:
         auth_error = 'expired'
@@ -146,10 +152,9 @@ def resetChangePOST(auth, uid, token):
     password2 = i.get('password2', '').strip()
     try:
         user = auth._db.select('user',
-            where = 'user_id = $uid',
-            vars = {'uid': uid}
-        )
-        if not len(user):
+                               where = 'user_id = $uid',
+                               vars = {'uid': uid}).list()
+        if not user:
             raise AuthError, 'expired'
         user = user[0]
         if not tokens.check_token(user, token, auth.config.reset_expire_after):

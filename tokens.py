@@ -1,4 +1,4 @@
-# −*− coding: UTF−8 −*−
+# −*− coding: utf−8 −*−
 """
 Functions to generate and check tokens for the password
 reset mechanism.
@@ -53,8 +53,7 @@ def _make_token(user, timestamp):
         unicode(user.user_id),
         u'@', user.user_password,
         unicode(user.user_last_login),
-        unicode(timestamp),
-    ]
+        unicode(timestamp)]
     hash = sha.new(''.join(items)).hexdigest()
     return "%s$%s" % (ts_b36, hash)
 

@@ -1,4 +1,4 @@
-# −*− coding: UTF−8 −*−
+# −*− coding: utf−8 −*−
 """
 Authentication module for web.py
 
@@ -36,7 +36,7 @@ from web.session import SessionExpired
 from os import urandom
 import sha
 sha = sha.new
-from time import sleep
+
 from datetime import datetime
 import views
 from views import AuthError
@@ -93,6 +93,7 @@ class DBAuth(object):
                 raise HashError, "Hash type must be 'sha512', 'sha1' or 'bcrypt'"
         except ImportError:
             raise HashError, 'Hash type %s not available' % (hash,)
+        
         if self.config.auto_map:
             self.__mapping()
 
@@ -176,18 +177,16 @@ class DBAuth(object):
         a user object (minus the password hash).
         """
         login = login.strip()
-        password = password.strip()        
-        user = self._db.select('user',
-            where = 'user_login = $login', 
-            vars = {'login': login}
-        )
-        if not len(user):
-            return None
+        password = password.strip()
+        
+        query_where = web.db.sqlwhere({'user_login': login})
+        user = self._db.select('user', where = query_where).list()
+        if not user: return
+        
         user = user[0]
-        if user.user_status == 'deleted':
-            return None
+        if user.user_status == 'deleted': return
         if not self.checkPassword(password, user.user_password):
-            return None
+            return
         
         # Auto-update the password hash to the current algorithm
         hashtype, n, salt = splitPassword(user.user_password)
@@ -202,10 +201,10 @@ class DBAuth(object):
         Set the user as logged in.
         """
         self._db.update('user',
-            user_last_login = datetime.utcnow(),
-            where = 'user_id = $uid',
-            vars = {'uid': user.user_id}
-        )
+                        user_last_login = datetime.utcnow(),
+                        where = 'user_id = $uid',
+                        vars = {'uid': user.user_id})
+        
         user.perms = self.getPermissions(user)
         try:
             del user['user_password']
@@ -225,22 +224,31 @@ class DBAuth(object):
         """
         Return True if a user with that login already exist.
         """
+        query_where = web.db.sqlwhere({'user_login': login})
         count = self._db.select('user',
-            what = 'count(*) as count',
-            where = 'user_login = $login',
-            vars = {'login': login}
-        )[0].count
+                                what = 'count(*) as count',
+                                where = query_where).list()
+        if not count: return False
+        
+        count = int(count[0].count)
         return count > 0
     
     def createUser(self, login, password=None, perms=[], **data):
         """
         Create a new user and returns its id.
+        
         If password is None, it will marks the user as having no password
         (check_password() for this user will never return True).
         """
         login = login.strip()
-        if self.userExist(login):
-            raise AuthError, 'user exist'
+
+        # user exist, just return user_id
+        user_existed = self.userExist(login)
+        if user_existed:
+            print 'user exist'
+            user_id = user_existed.user_id
+            return user_id
+            
         if not password:
             hashed = UNUSABLE_PASSWORD
         else:
@@ -250,10 +258,9 @@ class DBAuth(object):
             hashed = self.hash(password)
         
         user_id = self._db.insert('user',
-            user_login = login,
-            user_password = hashed,
-            **data
-        )
+                                  user_login = login,
+                                  user_password = hashed,
+                                  **data)
         for perm in perms:
             self.addPermission(perm, user_id)
         return user_id
@@ -273,10 +280,9 @@ class DBAuth(object):
             hashed = self.hash(password.strip())
         
         self._db.update('user',
-            user_password = hashed,
-            where = 'user_login = $login',
-            vars = {'login': login}
-        )
+                        user_password = hashed,
+                        where = 'user_login = $login',
+                        vars = {'login': login})
         return
 
     def updateUser(self, login, **data):
@@ -288,11 +294,9 @@ class DBAuth(object):
             self.setPassword(login, data['password'])
             del data['password']
         auth_user = self.getUser()
-        self._db.update('user',
-            where = 'user_login = $login',
-            vars = {'login': login},
-            **data
-        )
+        query_where = web.db.sqlwhere({'user_login': login})
+        self._db.update('user', where = query_where, **data)
+        
         if auth_user and auth_user.user_login == login:
             for k in data:
                 self.session.user[k] = data[k]
@@ -301,23 +305,25 @@ class DBAuth(object):
     def getUser(self, login=None):
         """
         Returns a user object (minus the password hash).
+        
         If login is None returns the currently authenticated user object
         or None if there isn't one.
-        """
-        if login:
-            user = self._db.select('user',
-                where = 'user_login = $login',
-                vars = {'login': login}
-            )
-            if not len(user):
-                return None
-            user = user[0]
-            del user[user_password]
-        else:
+
+        Arguments:
+        - `login`: str, user login name.
+        """    
+        if not login:
             try:
                 user = self.session.user
             except (AttributeError, SessionExpired):
-                return None
+                return
+            
+        query_where = web.db.sqlwhere({'user_login': login})
+        user = self._db.select('user', where = query_where).list()
+        if not user: return
+        
+        user = user[0]
+        del user['user_password'] # bug fixed by Galeo Tian
         return user
     
     def passTest(self, test, user=None):
@@ -327,8 +333,8 @@ class DBAuth(object):
         True or False.
         """
         user = user or self.getUser()
-        if not user:
-            return False
+        if not user: return False
+        
         return test(user)
 
     def hasPerm(self, perm, user=None):
@@ -338,8 +344,8 @@ class DBAuth(object):
         of them.
         """
         user = user or self.getUser()
-        if not user:
-            return False
+        if not user: return False
+        
         # perm is a sequence?
         try:
             perm.__iter__
@@ -355,11 +361,10 @@ class DBAuth(object):
         """
         user = user or self.getUser()
         dbperms = self._db.select('permission LEFT JOIN user_permission' \
-            ' ON permission_id = up_permission_id',
-            what = 'permission_codename',
-            where = 'up_user_id = $uid',
-            vars = {'uid': user.user_id}
-        )
+                                      ' ON permission_id = up_permission_id',
+                                  what = 'permission_codename',
+                                  where = 'up_user_id = $uid',
+                                  vars = {'uid': user.user_id}).list()
         perms = set(p.permission_codename for p in dbperms)
         return perms
     
@@ -369,22 +374,19 @@ class DBAuth(object):
         it update the description.
         """
         dbperm = self._db.select('permission',
-            what = 'permission_id',
-            where = 'permission_codename = $codename',
-            vars = {'codename': codename}
-        )
+                                 what = 'permission_id',
+                                 where = 'permission_codename = $codename',
+                                 vars = {'codename': codename}).list()
         if len(dbperm):
             pid = dbperm[0].permission_id
             self._db.update('permission',
-                permission_desc = desc,
-                where = 'permission_id = $pid',
-                vars = {'pid': pid}
-            )
+                            permission_desc = desc,
+                            where = 'permission_id = $pid',
+                            vars = {'pid': pid})
         else:
             pid = self._db.insert('permission',
-                permission_codename = codename,
-                permission_desc = desc,
-            )
+                                  permission_codename = codename,
+                                  permission_desc = desc)
         return pid
     
     def deletePermission(self, codename):
@@ -392,22 +394,19 @@ class DBAuth(object):
         Deletes a permission
         """
         dbperm = self._db.select('permission',
-            what = 'permission_id',
-            where = 'permission_codename = $codename',
-            vars = {'codename': codename}
-        )
-        if not len(dbperm):
-            return
+                                 what = 'permission_id',
+                                 where = 'permission_codename = $codename',
+                                 vars = {'codename': codename}).list()
+        if not dbperm: return
 
         pid = dbperm[0].permission_id
         self._db.delete('user_permission',
-            where = 'up_permission_id = $pid',
-            vars = {'pid': pid}
-        )
+                        where = 'up_permission_id = $pid',
+                        vars = {'pid': pid})
+        
         self._db.delete('permission',
-            where = 'permission_id = $pid',
-            vars = {'pid': pid}
-        )
+                        where = 'permission_id = $pid',
+                        vars = {'pid': pid})
         return
     
     def addPermission(self, perm, user_id):
@@ -416,22 +415,22 @@ class DBAuth(object):
         """
         auth_user = self.getUser()
         dbperm = self._db.select('permission',
-            where = 'permission_codename = $perm',
-            vars = {'perm': perm}
-        )
-        if not len(dbperm):
-            return
+                                 where = 'permission_codename = $perm',
+                                 vars = {'perm': perm}).list()
+        if not dbperm: return
+        
         dbperm = dbperm[0]
-        dbup = self._db.select('user_permission',
-            where = 'up_user_id = $user_id AND up_permission_id = $perm_id',
-            vars = {'user_id': user_id, 'perm_id': dbperm.permission_id}
-        )
-        if len(dbup):
-            return
+        query_where = web.db.sqlwhere({
+                'up_user_id': user_id,
+                'up_permission_id': dbperm.permission_id
+                })
+        dbup = self._db.select('user_permission', where = query_where).list()
+        if dbup: return # already assigned
+        
         self._db.insert('user_permission',
-            up_user_id = user_id,
-            up_permission_id = dbperm.permission_id,
-        )
+                        up_user_id = user_id,
+                        up_permission_id = dbperm.permission_id)
+        
         if auth_user and auth_user.user_id == user_id:
             auth_user.perms.add(perm)
         return
@@ -440,17 +439,19 @@ class DBAuth(object):
         """ 
         """
         auth_user = self.getUser()
-        dbperm = self._db.select('permission',
-            where = 'permission_codename = $perm',
-            vars = {'perm': perm}
-        )
-        if not len(dbperm):
-            return
+        
+        query_where = web.db.sqlwhere({'permission_codename': perm})
+        dbperm = self._db.select('permission', where = query_where).list()
+        if not dbperm: return
+        
         dbperm = dbperm[0]
-        self._db.delete('user_permission',
-            where = 'up_user_id = $user_id AND up_permission_id = $perm_id',
-            vars = {'user_id': user_id, 'perm_id': dbperm.permission_id}
-        )
+
+        query_where = web.db.sqlwhere({
+                'up_user_id': user_id,
+                'up_permission_id': dbperm.permission_id
+                })
+        self._db.delete('user_permission', where = query_where)
+        
         if auth_user and auth_user.user_id == user_id:
             try:
                 auth_user.perms.remove(perm)
@@ -508,7 +509,8 @@ def randomPassword():
     """
     return sha(urandom(40)).hexdigest()
     
-def tempPassword(length=10, allowed_chars='abcdefghjkpqrstuvwxyz3456789ACDEFGHJKLMNPQRSTUVWXY'):
+def tempPassword(length=10,
+                 allowed_chars='abcdefghjkpqrstuvwxyz3456789ACDEFGHJKLMNPQRSTUVWXY'):
     """
     Generates a temporary password with the given length and given
     allowed_chars.
