@@ -311,19 +311,18 @@ class DBAuth(object):
 
         Arguments:
         - `login`: str, user login name.
-        """    
+        """
         if not login:
             try:
                 user = self.session.user
             except (AttributeError, SessionExpired):
                 return
-            
-        query_where = web.db.sqlwhere({'user_login': login})
-        user = self._db.select('user', where = query_where).list()
-        if not user: return
-        
-        user = user[0]
-        del user['user_password'] # bug fixed by Galeo Tian
+        else:
+            query_where = web.db.sqlwhere({'user_login': login})
+            user = self._db.select('user', where = query_where).list()
+            if not user: return
+            user = user[0]
+            del user['user_password'] # bug fixed by Galeo Tian
         return user
     
     def passTest(self, test, user=None):
