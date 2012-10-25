@@ -8,11 +8,13 @@ import web
 import sha
 from time import time
 
+
 def make_token(user):
     """Returns a token that can be used once to do a password reset
     for the given user.
     """
     return _make_token(user, int(time()))
+
 
 def check_token(user, token, expire_after):
     """ Check that a password reset token is correct and still valid
@@ -39,6 +41,7 @@ def check_token(user, token, expire_after):
 
     return True
 
+
 def _make_token(user, timestamp):
     ts_b36 = web.to36(timestamp)
 
@@ -56,4 +59,3 @@ def _make_token(user, timestamp):
         unicode(timestamp)]
     hash = sha.new(''.join(items)).hexdigest()
     return "%s$%s" % (ts_b36, hash)
-

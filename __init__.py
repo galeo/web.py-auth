@@ -3,4 +3,5 @@
 Authentication management for web.py
 """
 from dbauth import *
-import views, tokens
+import views
+import tokens
