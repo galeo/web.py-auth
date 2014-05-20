@@ -1,4 +1,5 @@
-# −*− coding: utf−8 −*−
+# -*- coding: utf-8 -*-
+
 """
 Authentication module for web.py
 
@@ -44,10 +45,12 @@ from views import AuthError
 
 DEFAULT_SETTINGS = utils.storage({
     'auto_map': True,
+    'captcha_enabled': False,
 
     'url_login': '/login',
     'url_logout': '/logout',
     'url_after_login': '/',  # Go there after a successful login
+    'url_captcha': '/captcha',  # Captcha
     'template_login': None,
 
     'url_reset_token': '/password_reset',
@@ -57,6 +60,7 @@ DEFAULT_SETTINGS = utils.storage({
     'template_reset_change': None,
     'reset_expire_after': 2,  # Hours
 
+    'captcha_image_type': 'png',  # The default captcha image file type
     'hash': 'sha512',
     'hash_depth': 12,
     'db_email_field': 'user_email',
@@ -83,6 +87,10 @@ class DBAuth(object):
                                           web.session.DiskStore('sessions'))
         self.session = session
         self.config = utils.storage(utils.dictadd(DEFAULT_SETTINGS, settings))
+
+        if 'captcha_func' in self.config.keys():
+            self.config.captcha_enabled = True
+
         hashtype = self.config.get('hash')
         try:
             if hashtype == 'sha512':
@@ -102,6 +110,7 @@ class DBAuth(object):
 
     def __mapping(self):
         auth = self
+        url_captcha = self.config.url_captcha + '/?$'
         url_login = self.config.url_login + '/?$'
         url_logout = self.config.url_logout + '/?$'
         url_reset_token = self.config.url_reset_token + '/?$'
@@ -113,6 +122,13 @@ class DBAuth(object):
 
             def POST(self): return auth.loginPOST()
         self._app.add_mapping(url_login, Login)
+
+        class Captcha():
+            def GET(self):
+                web.header('Content-Type',
+                           "image/%s" % auth.config.get('captcha_image_type'))
+                return auth.captchaGET()
+        self._app.add_mapping(url_captcha, Captcha)
 
         class Logout():
             def GET(self): return auth.logoutGET()
@@ -135,19 +151,28 @@ class DBAuth(object):
 
     def protected(self, **pars):
         """
-        @protected([perm][, test])
+        @protected([perm][, captcha_on][, test])
 
         Decorator for limiting the access to pages.
-        'perm' can be either a single permission (string) or a sequence
-        of them.
+
+        'perm' can be either a single permission (string) or a sequence of them.
+
+        'captcha_on' is a Boole value('True' or 'False') to turn on or off the
+        captcha validation.
+
         'test' must be a function that takes a user object and returns
         True or False.
         """
         def decorator(func):
             def proxyfunc(iself, *args, **kw):
                 try:
-                    user = self.session.user
+                    if pars.get('captcha_on', ''):
+                        if self.config.captcha_enabled:
+                            self.session.captcha_on = True
+                        else:
+                            raise AuthError('Captcha is disabled.')
 
+                    user = self.session.user
                     if 'perm' in pars:
                         if not self.hasPerm(pars['perm'], user):
                             raise AuthError
@@ -465,6 +490,7 @@ class DBAuth(object):
 
     loginForm = views.loginForm
     loginGET = views.loginGET
+    captchaGET = views.captchaGET
     loginPOST = views.loginPOST
     logoutGET = views.logoutGET
     logoutPOST = views.logoutPOST

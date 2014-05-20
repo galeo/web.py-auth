@@ -1,4 +1,4 @@
-# −*− coding: utf−8 −*−
+# -*- coding: utf-8 -*-
 """
 Functions to generate and check tokens for the password
 reset mechanism.

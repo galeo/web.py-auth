@@ -1,4 +1,4 @@
-$def with (error=None, url_reset='')
+$def with (error=None, captcha_on=False, url_reset='')
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
@@ -53,7 +53,7 @@ button {
   text-align: center;
   font-size: 13px;
   font-weight: bold;
-} 
+}
 #container {
   margin: 0 auto;
   position: relative;
@@ -76,6 +76,8 @@ button {
       <div class="error">Invalid username or password</div>
   $elif error == 'suspended':
       <div class="error">Your account has been suspended</div>
+  $elif error == 'captcha_wrong':
+      <div class="error">Wrong captcha code</div>
 
   <form action="" method="post" accept-charset="utf-8">
     <p><label for="login">Username:
@@ -84,6 +86,11 @@ button {
     <p><label for="auth_passw">Password:
     <input type="password" name="password" id="password" maxlength="254" tabindex="2" />
     </label></p>
+    $if captcha_on:
+        <p><label for="captcha">Captcha:
+          <input type="text" name="captcha" id="captcha" maxlength="254" tabindex="3" />
+          <img src="/captcha" alt="captcha image" />
+        </label></p>
     <p class="submit"><button type="submit">Log in</button></p>
   </form>
   <p class="reset"><a href="$url_reset">Forgot your username or password?</a></p>

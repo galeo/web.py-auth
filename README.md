@@ -12,6 +12,8 @@ The module allows you to:
 
 * Generate and validate tokens for passwords resets.
 
+* CAPTCHA validation(Only visual CAPTCHAs) (**New**)
+
 It also includes default pages to login, generate a password-reset token, email the token and set a new password after the token is validated.
 
 ## Installation
@@ -43,7 +45,7 @@ It also includes default pages to login, generate a password-reset token, email 
     )
     ```
 
-3. Use in your code:
+3. Generally use in your code:
 
     ```python
     import web
@@ -65,6 +67,21 @@ It also includes default pages to login, generate a password-reset token, email 
     mysession = web.session.Session(app, web.session.DiskStore('sessions'))
     auth = DBAuth(app, db, mysession, **settings)
     ```
+
+4. Enable CAPTCHA validation
+
+   To enable the [CAPTCHA](https://en.wikipedia.org/wiki/CAPTCHA) validation, you need an extra CAPTCHA module which could generate the CAPTCHAs(visual CAPTCHAs) and the text-based check-code(can be input by user on the authentication page). You should use a wrapper function, which has **No** parameters and exact **TWO** return values: one is the CAPTCHA image, the other one is the CAPTCHA check-code string. Also, you should optionally specify the file type of the CAPTCHA image. And then, pass the wrapper function and the image type as arguments.
+
+   ```python
+   from Captcha import captcha_func
+
+   settings = dict({
+       'captcha_func': captcha_func,
+       'captcha_image_type': 'png',
+   })
+
+   auth = DBAuth(app, db, **settings)
+   ```
 
 ## Usage
 
@@ -105,7 +122,16 @@ class somePage:
         ...
 </pre>
 
-If the user isn't authorized it'll be redirected to <code>settings.url_login</code> ('/login' by default).
+Limiting access to users who need to pass the CAPTCHA validation
+
+<pre>
+class somePage:
+    <strong>@auth.protected(captcha_on=True)</strong>
+    def GET(self):
+        ...
+</pre>
+
+If the CAPTCHA validation is failed or the user isn't authorized it'll be redirected to <code>settings.url_login</code> ('/login' by default).
 </dd>
 
 <dt>auth.authenticate(login, password)</dt>

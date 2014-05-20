@@ -1,4 +1,5 @@
-# −*− coding: utf−8 −*−
+# -*- coding: utf-8 -*-
+
 """
 Template pages.
 """
@@ -43,11 +44,41 @@ def loginGET(auth, template=None):
     if 'user' in auth.session.keys():
         web.found(auth.config.url_after_login)
         return
+
     template = template or auth.config.template_login or render.login
+
     auth_error = auth.session.get('auth_error', '')
     if auth_error:
         del auth.session['auth_error']
-    return template(error=auth_error, url_reset=auth.config.url_reset_token)
+
+    return template(error=auth_error,
+                    captcha_on=auth.session.get('captcha_on', False),
+                    url_reset=auth.config.url_reset_token)
+
+
+def captchaGET(auth):
+    if (not auth.config.captcha_enabled) or \
+       (not auth.session.get('captcha_on', False)):
+        return
+
+    try:
+        captcha, checkcode = auth.config.captcha_func()
+    except (AttributeError, TypeError):
+        return
+
+    try:
+        if not isinstance(checkcode, basestring):
+            raise TypeError("Captcha checkcode should be a string.")
+
+        if not isinstance(captcha, str):
+            raise TypeError("Captcha image should be a str instance, "
+                            "the value or content of a cStringIO.StringO or "
+                            "StringIO.StringO object.")
+    except TypeError:
+        return
+
+    auth.session.captcha_checkcode = checkcode
+    return captcha
 
 
 def loginPOST(auth):
@@ -57,13 +88,29 @@ def loginPOST(auth):
     i = web.input()
     login = i.get('login', '').strip()
     password = i.get('password', '').strip()
+
+    captcha_on = auth.session.get('captcha_on', False)
+    if captcha_on:
+        try:
+            checkcode_input = i.get('captcha').strip().lower()
+            checkcode_session = auth.session.captcha_checkcode.lower()
+
+            if not checkcode_input == checkcode_session:
+                raise AuthError('Captcha validation failed: Wrong checkcode!')
+        except (AttributeError, AuthError):
+            auth.session.auth_error = 'captcha_wrong'
+            web.found(auth.config.url_login)
+            return
+
     user = auth.authenticate(login, password)
     if not user:
         auth.session.auth_error = 'fail'
+        auth.session.captcha_on = True
         web.found(auth.config.url_login)
         return
     elif user.user_status == 'suspended':
         auth.session.auth_error = 'suspended'
+        auth.session.captcha_on = True
         web.found(auth.config.url_login)
         return
     else:
@@ -71,6 +118,12 @@ def loginPOST(auth):
     next = auth.session.get('next', auth.config.url_after_login)
     try:
         del auth.session['next']
+    except KeyError:
+        pass
+    try:
+        # auth.session.captcha_on = False
+        del auth.session['captcha_on']
+        del auth.session['captcha_checkcode']
     except KeyError:
         pass
     web.found(next)
