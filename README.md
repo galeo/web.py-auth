@@ -70,7 +70,7 @@ It also includes default pages to login, generate a password-reset token, email 
 
 4. Enable CAPTCHA validation
 
-   To enable the [CAPTCHA](https://en.wikipedia.org/wiki/CAPTCHA) validation, you need an extra CAPTCHA module which could generate the CAPTCHAs(visual CAPTCHAs) and the text-based check-code(can be input by user on the authentication page). You should use a wrapper function, which has **No** parameters and exact **TWO** return values: one is the CAPTCHA image, the other one is the CAPTCHA check-code string. Also, you should optionally specify the file type of the CAPTCHA image. And then, pass the wrapper function and the image type as arguments.
+   To enable the [CAPTCHA](https://en.wikipedia.org/wiki/CAPTCHA) validation, you need an extra CAPTCHA module which could generate the CAPTCHAs(visual CAPTCHAs) and the text-based check-code(can be input by user on the authentication page). You should use a wrapper function, which has **No** parameters and exact **TWO** return values. One is the CAPTCHA image, an ```str``` instance, the value or content of a ```cStringIO.StringO``` or ```StringIO.StringO``` object(see [here](https://docs.python.org/2/library/stringio.html) for details), whose file type determines the value of ```captcha_image_type```. The other one is the CAPTCHA check-code string. Then, pass the wrapper function and the image type as arguments.
 
    ```python
    from Captcha import captcha_func
@@ -273,6 +273,21 @@ Artificial delay (in seconds) to slow down brute-force attacks
 <dt>auto_map = True</dt>
 <dd>
 Disable the auto-magically generated pages for login, logout and password reset. If it is <code>True</code>, it will use the url_* and template_* settings.
+</dd>
+
+<dt>captcha_enabled = False</dt>
+<dd>
+CAPTCHA validation is disabled by default. You could enable it automatically by define an extra CAPTCHA generation module as described above.
+</dd>
+
+<dt> captcha_image_type = 'png'</dt>
+<dd>
+The default file type of the CAPTCHA image, which is decided by the module which generates the CAPTCHA image. You could set the value here without passing a dict argument <code>settings</code> that contains it.
+</dd>
+
+<dt>url_captcha = '/captcha'</dt>
+<dd>
+The URL for the CAPTCHA image.
 </dd>
 
 <dt>url_login = '/login'</dt>

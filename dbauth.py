@@ -60,13 +60,13 @@ DEFAULT_SETTINGS = utils.storage({
     'template_reset_change': None,
     'reset_expire_after': 2,  # Hours
 
-    'captcha_image_type': 'png',  # The default captcha image file type
     'hash': 'sha512',
     'hash_depth': 12,
     'db_email_field': 'user_email',
     'password_minlen': 6,  # Min length of passwords
     'forced_delay': 0.5,   # Artificial delay to slow down brute-force attacks
     'email_from': '',
+    'captcha_image_type': 'png',  # The default captcha image file type
 })
 
 UNUSABLE_PASSWORD = '!'  # This will never be a valid hash
