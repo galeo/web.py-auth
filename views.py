@@ -70,7 +70,8 @@ def captchaGET(auth):
         if not isinstance(checkcode, basestring):
             raise TypeError("Captcha checkcode should be a string.")
 
-        if not isinstance(captcha, str):
+        captcha_img = captcha.getvalue()
+        if not isinstance(captcha_img, str):
             raise TypeError("Captcha image should be a str instance, "
                             "the value or content of a cStringIO.StringO or "
                             "StringIO.StringO object.")
@@ -78,7 +79,7 @@ def captchaGET(auth):
         return
 
     auth.session.captcha_checkcode = checkcode
-    return captcha
+    return captcha_img
 
 
 def loginPOST(auth):
