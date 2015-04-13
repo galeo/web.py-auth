@@ -354,7 +354,7 @@ class DBAuth(object):
             user = self._db.select('user', where=query_where).list()
             if not user: return
             user = user[0]
-            del user['user_password']  # bug fixed by Galeo Tian
+            del user['user_password']
         return user
 
     def passTest(self, test, user=None):
