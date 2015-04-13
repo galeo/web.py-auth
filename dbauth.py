@@ -278,7 +278,7 @@ class DBAuth(object):
         user_existed = self.userExist(login)
         if user_existed:
             print 'user exist'
-            user_id = user_existed.user_id
+            user_id = self.getUser(login).user_id
             return user_id
 
         if not password:
