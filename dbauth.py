@@ -352,9 +352,14 @@ class DBAuth(object):
         else:
             query_where = web.db.sqlwhere({'user_login': login})
             user = self._db.select('user', where=query_where).list()
-            if not user: return
+            if not user:
+                return
+
             user = user[0]
             del user['user_password']
+            user_perms = self.getPermissions(user)
+            user['perms'] = user_perms
+
         return user
 
     def passTest(self, test, user=None):
@@ -375,7 +380,15 @@ class DBAuth(object):
         of them.
         """
         user = user or self.getUser()
-        if not user: return False
+        if not user:
+            return False
+
+        if not hasattr(user, 'perms') or not user.get('perms', None):
+            user_perms = self.getPermissions(user)
+            if not user_perms:
+                return False
+        else:
+            user_perms = user.perms
 
         # perm is a sequence?
         try:
@@ -383,7 +396,7 @@ class DBAuth(object):
         except AttributeError:
             perm = [perm]
         perm = set(perm)
-        return user.perms.intersection(perm) == perm
+        return user_perms.intersection(perm) == perm
 
     def getPermissions(self, user=None):
         """
