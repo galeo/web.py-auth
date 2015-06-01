@@ -383,12 +383,12 @@ class DBAuth(object):
         if not user:
             return False
 
-        if not hasattr(user, 'perms') or not user.get('perms', None):
+        if not hasattr(user, 'perms'):
             user_perms = self.getPermissions(user)
-            if not user_perms:
-                return False
         else:
             user_perms = user.perms
+        if not user_perms:
+            return False
 
         # perm is a sequence?
         try:
