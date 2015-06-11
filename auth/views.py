@@ -4,6 +4,7 @@
 Template pages.
 """
 
+import os
 import web
 import tokens
 from time import sleep
@@ -12,7 +13,9 @@ from time import sleep
 class AuthError(Exception): pass
 
 # Will mapping to local templates path
-render = web.template.render('templates/')
+curdir = os.path.abspath(os.path.dirname(__file__))
+local_template_path = os.path.join(curdir, 'templates/')
+render = web.template.render(local_template_path)
 
 
 def loginForm(auth):
