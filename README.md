@@ -154,7 +154,7 @@ This function does not log in the user. Use <code>auth.login()</code> for that.
 Set the user as logged in.
 </dd>
 
-<dt>auth.checkPassword(password, stored_passw)</dt>
+<dt>auth.check_password(password, stored_passw)</dt>
 
 <dd>Returns a boolean of whether the password was correct.</dd>
 
@@ -162,76 +162,76 @@ Set the user as logged in.
 
 <dd>Flush the authenticated user session</dd>
 
-<dt>auth.userExist(login)</dt>
+<dt>auth.user_exist(login)</dt>
 
 <dd>Return <code>True</code> if a user with that login already exist.</dd>
 
-<dt>auth.createUser(login, password=None, perms=[], **data)</dt>
+<dt>auth.create_user(login, password=None, perms=[], **data)</dt>
 <dd>
 Create a new user and returns the <code>user_id</code>.<br>
 
 If password is None, it will marks the user as having no password (<code>check_password()</code> for this user will never return <code>True</code>).
 </dd>
 
-<dt>auth.setPassword(login, password=None)</dt>
+<dt>auth.set_password(login, password=None)</dt>
 <dd>
 Sets the password of an already existing user to the given raw string, taking care of the password hashing.
 </dd>
 
-<dt>auth.updateUser(login, **data)</dt>
+<dt>auth.update_user(login, **data)</dt>
 <dd>
 Update the user's data taking care of the password hashing if one is provided.
 </dd>
 
-<dt>auth.getUser(login=None)</dt>
+<dt>auth.get_user(login=None)</dt>
 <dd>
 Returns a user object (minus the password hash).<br>
 
 If login is <code>None</code> returns the currently authenticated user object or <code>None</code> if there isn't one
 </dd>
 
-<dt>auth.passTest(user=None)</dt>
+<dt>auth.pass_test(user=None)</dt>
 <dd>
 Return True if the user pass the test.<br>
 
 test must be a function that takes a user object and returns <code>True</code> or <code>False</code>.
 </dd>
 
-<dt>auth.hasPerm(perm, user=None)</dt>
+<dt>auth.has_perm(perm, user=None)</dt>
 <dd>
 Return True if the user has the permission.<br>
 
 Perm can be either a single permission (string) or a sequence of them.
 </dd>
 
-<dt>auth.getPermissions(user=None)</dt>
+<dt>auth.get_permissions(user=None)</dt>
 <dd>
 Returns a list of permission strings that the user has.
 </dd>
 
-<dt>auth.createPermission(codename, desc)</dt>
+<dt>auth.create_permission(codename, desc)</dt>
 <dd>
 Creates a new permission. If the permission already exists it update the description.<br>
 
-Example: <code>createPermission('new_posts', 'Can write new posts')</code>
+Example: <code>create_permission('new_posts', 'Can write new posts')</code>
 </dt>
 
-<dt>auth.deletePermission(codename)</dt>
+<dt>auth.delete_permission(codename)</dt>
 <dd>
 Deletes a permission
 </dd>
 
-<dt>auth.addPermission(perm, user_id)</dt>
+<dt>auth.add_permission(perm, user_id)</dt>
 <dd>
 Assign an existing permission to a user.
 </dd>
 
-<dt>auth.removePermission(perm, user_id)</dt>
+<dt>auth.remove_permission(perm, user_id)</dt>
 <dd>
 Removes the permission.
 </dd>
 
-<dt>auth.loginForm(auth)</dt>
+<dt>auth.login_form(auth)</dt>
 <dd>
 A login form to be used inside other pages (like the home page).
 </dd>
@@ -262,7 +262,7 @@ Field of the user table that contains the email address. For instance, if you wa
 
 <dt>password_minlen = 6</dt>
 <dd>
-Minimum password length. <code>SetPassword()</code> and <code>createUser</code> will raise an "AuthError, 'bad password'" if the password is shorter than this.
+Minimum password length. <code>set_password()</code> and <code>create_user</code> will raise an "AuthError, 'bad password'" if the password is shorter than this.
 </dd>
 
 <dt>forced_delay = 0.5</dt>

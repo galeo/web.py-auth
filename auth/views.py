@@ -20,7 +20,7 @@ local_template_path = os.path.join(curdir, 'templates/')
 render = web.template.render(local_template_path)
 
 
-def loginForm(auth):
+def login_form(auth):
     auth_error = auth.session.get('auth_error', '')
     if auth_error:
         del auth.session['auth_error']
@@ -45,7 +45,7 @@ def loginForm(auth):
     return form
 
 
-def loginGET(auth, template=None):
+def login_get(auth, template=None):
     if 'user' in auth.session.keys():
         web.found(auth.config.url_after_login)
         return
@@ -61,7 +61,7 @@ def loginGET(auth, template=None):
                     url_reset=auth.config.url_reset_token)
 
 
-def captchaGET(auth):
+def captcha_get(auth):
     if ((not auth.config.captcha_enabled) or
             (not auth.session.get('captcha_on', False))):
         return
@@ -87,7 +87,7 @@ def captchaGET(auth):
     return captcha_img
 
 
-def loginPOST(auth):
+def login_post(auth):
     # artificial delay (to slow down brute force attacks)
     sleep(auth.config.forced_delay)
 
@@ -136,16 +136,16 @@ def loginPOST(auth):
     return
 
 
-def logoutGET(auth):
+def logout_get(auth):
     auth.logout()
     web.found('/')
     return
 
 
-logoutPOST = logoutGET
+logout_post = logout_get
 
 
-def resetTokenGET(auth, template=None):
+def reset_token_get(auth, template=None):
     template = (template or
                 auth.config.template_reset_token or
                 render.reset_token)
@@ -155,7 +155,7 @@ def resetTokenGET(auth, template=None):
     return template(done=token_sent)
 
 
-def resetTokenPOST(auth, email_template=None):
+def reset_token_post(auth, email_template=None):
     template = (email_template or
                 auth.config.template_reset_email or
                 render.reset_email)
@@ -203,7 +203,7 @@ def resetTokenPOST(auth, email_template=None):
     web.found(web.ctx.path)
 
 
-def resetChangeGET(auth, uid, token, template=None):
+def reset_change_get(auth, uid, token, template=None):
     # artificial delay (to slow down brute force attacks)
     sleep(auth.config.forced_delay)
 
@@ -228,7 +228,7 @@ def resetChangeGET(auth, uid, token, template=None):
     return template(error=auth_error, url_reset=auth.config.url_reset_token)
 
 
-def resetChangePOST(auth, uid, token):
+def reset_change_post(auth, uid, token):
     # artificial delay (to slow down brute force attacks)
     sleep(auth.config.forced_delay)
 
@@ -249,7 +249,7 @@ def resetChangePOST(auth, uid, token):
         if len(password) < auth.config.password_minlen:
             raise AuthError('bad password')
 
-        auth.setPassword(user.user_login, password)
+        auth.set_password(user.user_login, password)
         auth.login(user)
     except AuthError, e:
         auth.session.auth_error = str(e)
