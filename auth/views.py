@@ -10,7 +10,9 @@ import web
 from . import tokens
 
 
-class AuthError(Exception): pass
+class AuthError(Exception):
+    pass
+
 
 # Will mapping to local templates path
 curdir = os.path.abspath(os.path.dirname(__file__))
@@ -60,8 +62,8 @@ def loginGET(auth, template=None):
 
 
 def captchaGET(auth):
-    if (not auth.config.captcha_enabled) or \
-       (not auth.session.get('captcha_on', False)):
+    if ((not auth.config.captcha_enabled) or
+            (not auth.session.get('captcha_on', False))):
         return
 
     try:
@@ -139,13 +141,14 @@ def logoutGET(auth):
     web.found('/')
     return
 
+
 logoutPOST = logoutGET
 
 
 def resetTokenGET(auth, template=None):
-    template = template or \
-        auth.config.template_reset_token or \
-        render.reset_token
+    template = (template or
+                auth.config.template_reset_token or
+                render.reset_token)
     token_sent = auth.session.get('auth_token_sent', False)
     if token_sent:
         del auth.session['auth_token_sent']
@@ -153,20 +156,22 @@ def resetTokenGET(auth, template=None):
 
 
 def resetTokenPOST(auth, email_template=None):
-    template = email_template or \
-        auth.config.template_reset_email or \
-        render.reset_email
+    template = (email_template or
+                auth.config.template_reset_email or
+                render.reset_email)
     i = web.input()
     login = i.get('login', '').strip()
     try:
-        if not login: raise AuthError
+        if not login:
+            raise AuthError
 
         query_where = web.db.sqlwhere(
             {'user_login': login,
              auth.config.db_email_field: login},
             ' OR ')
         user = auth._db.select('user', where=query_where).list()
-        if not user: raise AuthError
+        if not user:
+            raise AuthError
 
         user = user[0]
 
@@ -202,17 +207,17 @@ def resetChangeGET(auth, uid, token, template=None):
     # artificial delay (to slow down brute force attacks)
     sleep(auth.config.forced_delay)
 
-    template = template or \
-        auth.config.template_reset_change or \
-        render.reset_change
+    template = (template or
+                auth.config.template_reset_change or
+                render.reset_change)
     try:
         user = auth._db.select('user',
                                where='user_id = $uid',
                                vars={'uid': uid}).list()
-        if not user or \
-                not tokens.check_token(user[0],
-                                       token,
-                                       auth.config.reset_expire_after):
+        if ((not user) or
+                (not tokens.check_token(user[0],
+                                        token,
+                                        auth.config.reset_expire_after))):
             raise AuthError
     except AuthError:
         auth_error = 'expired'

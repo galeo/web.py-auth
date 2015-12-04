@@ -120,9 +120,11 @@ class DBAuth(object):
             '/(?P<uid>[0-9]+)\$(?P<token>[0-9a-z\$\.]+)/?$'
 
         class Login():
-            def GET(self): return auth.loginGET()
+            def GET(self):
+                return auth.loginGET()
 
-            def POST(self): return auth.loginPOST()
+            def POST(self):
+                return auth.loginPOST()
         self._app.add_mapping(url_login, Login)
 
         class Captcha():
@@ -133,21 +135,27 @@ class DBAuth(object):
         self._app.add_mapping(url_captcha, Captcha)
 
         class Logout():
-            def GET(self): return auth.logoutGET()
+            def GET(self):
+                return auth.logoutGET()
 
-            def POST(self): return auth.logoutPOST()
+            def POST(self):
+                return auth.logoutPOST()
         self._app.add_mapping(url_logout, Logout)
 
         class ResetToken():
-            def GET(self): return auth.resetTokenGET()
+            def GET(self):
+                return auth.resetTokenGET()
 
-            def POST(self): return auth.resetTokenPOST()
+            def POST(self):
+                return auth.resetTokenPOST()
         self._app.add_mapping(url_reset_token, ResetToken)
 
         class ResetChange():
-            def GET(self, uid, token): return auth.resetChangeGET(uid, token)
+            def GET(self, uid, token):
+                return auth.resetChangeGET(uid, token)
 
-            def POST(self, uid, token): return auth.resetChangePOST(uid, token)
+            def POST(self, uid, token):
+                return auth.resetChangePOST(uid, token)
         self._app.add_mapping(url_reset_change, ResetChange)
         return
 
