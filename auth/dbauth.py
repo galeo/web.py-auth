@@ -34,8 +34,7 @@ Usage:
 from os import urandom
 from datetime import datetime
 
-import sha
-sha = sha.new
+from hashlib import sha1 as sha
 
 import web
 from web import utils

@@ -5,7 +5,7 @@ reset mechanism.
 """
 
 from time import time
-import sha
+from hashlib import sha1 as sha
 import web
 
 
@@ -56,5 +56,5 @@ def _make_token(user, timestamp):
              u'@', user.user_password,
              unicode(user.user_last_login),
              unicode(timestamp)]
-    hash = sha.new(''.join(items)).hexdigest()
+    hash = sha(''.join(items)).hexdigest()
     return "%s$%s" % (ts_b36, hash)
