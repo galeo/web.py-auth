@@ -287,7 +287,6 @@ class DBAuth(object):
         # user exist, just return user_id
         user_existed = self.user_exist(login)
         if user_existed:
-            print 'user exist'
             user_id = self.get_user(login).user_id
             return user_id
 
@@ -569,7 +568,7 @@ def random_password():
 
 def temp_password(length=10,
                   allowed_chars="abcdefghjkpqrstuvwxyz"
-                 "3456789ACDEFGHJKLMNPQRSTUVWXY"):
+                  "3456789ACDEFGHJKLMNPQRSTUVWXY"):
     """
     Generates a temporary password with the given length and given
     allowed_chars.

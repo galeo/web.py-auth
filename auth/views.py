@@ -165,10 +165,9 @@ def reset_token_post(auth, email_template=None):
         if not login:
             raise AuthError
 
-        query_where = web.db.sqlwhere(
-            {'user_login': login,
-             auth.config.db_email_field: login},
-            ' OR ')
+        query_where = web.db.sqlwhere({'user_login': login,
+                                       auth.config.db_email_field: login},
+                                      ' OR ')
         user = auth._db.select('user', where=query_where).list()
         if not user:
             raise AuthError
@@ -178,12 +177,10 @@ def reset_token_post(auth, email_template=None):
         from_address = auth.config.email_from
         to_address = user[auth.config.db_email_field]
         token = tokens.make_token(user)
-        token_url = '%s%s/%s$%s' % (
-            web.ctx.home,
-            auth.config.url_reset_change,
-            user.user_id,
-            token)
-        print token_url
+        token_url = '%s%s/%s$%s' % (web.ctx.home,
+                                    auth.config.url_reset_change,
+                                    user.user_id,
+                                    token)
         message = template(token_url)
         subject = message.get('Subject', 'Password reset').strip()
         headers = dict(message)

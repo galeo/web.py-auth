@@ -51,11 +51,10 @@ def _make_token(user, timestamp):
     # password-- is used.
     # By hashing also a secret key the system cannot be subverted
     # even if the database is compromised.
-    items = [
-        web.config.session_parameters.secret_key,
-        unicode(user.user_id),
-        u'@', user.user_password,
-        unicode(user.user_last_login),
-        unicode(timestamp)]
+    items = [web.config.session_parameters.secret_key,
+             unicode(user.user_id),
+             u'@', user.user_password,
+             unicode(user.user_last_login),
+             unicode(timestamp)]
     hash = sha.new(''.join(items)).hexdigest()
     return "%s$%s" % (ts_b36, hash)
