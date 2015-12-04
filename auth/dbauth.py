@@ -31,16 +31,18 @@ Usage:
 >>> auth = DBAuth(app, db, **settings)
 """
 
-import web
-from web import utils
-from web.session import SessionExpired
 from os import urandom
+from datetime import datetime
+
 import sha
 sha = sha.new
 
-from datetime import datetime
-import views
-from views import AuthError
+import web
+from web import utils
+from web.session import SessionExpired
+
+from . import views
+from .views import AuthError
 
 
 DEFAULT_SETTINGS = utils.storage({

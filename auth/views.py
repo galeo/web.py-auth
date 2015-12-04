@@ -5,9 +5,9 @@ Template pages.
 """
 
 import os
-import web
-import tokens
 from time import sleep
+import web
+from . import tokens
 
 
 class AuthError(Exception): pass

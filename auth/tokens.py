@@ -4,9 +4,9 @@ Functions to generate and check tokens for the password
 reset mechanism.
 """
 
-import web
-import sha
 from time import time
+import sha
+import web
 
 
 def make_token(user):
