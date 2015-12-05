@@ -86,7 +86,7 @@ class DBAuth(object):
                 raise HashError("Hash type must be 'sha512', "
                                 "'sha1' or 'bcrypt'")
         except ImportError:
-            raise HashError('Hash type %s not available' % (hash,))
+            raise HashError('Hash type %s not available' % (hashtype,))
 
         if self.config.auto_map:
             self.__mapping()
