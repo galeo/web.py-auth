@@ -34,7 +34,7 @@ DEFAULT_SETTINGS = utils.storage({
     'template_reset_change': None,
     'reset_expire_after': 2,  # Hours
 
-    'hash': 'sha512',
+    'hash_type': 'sha512',
     'hash_depth': 12,
     'db_email_field': 'user_email',
     'password_minlen': 6,  # Min length of passwords
@@ -74,14 +74,14 @@ class DBAuth(object):
         if 'captcha_func' in self.config.keys():
             self.config.captcha_enabled = True
 
-        hashtype = self.config.get('hash')
+        hashtype = self.config.get('hash_type')
         try:
             if hashtype == 'sha512':
-                self.hash = hash_sha512
+                self.hash_func = hash_sha512
             elif hashtype == 'sha1':
-                self.hash = hash_sha1
+                self.hash_func = hash_sha1
             elif hashtype == 'bcrypt':
-                self.hash = hash_bcrypt
+                self.hash_func = hash_bcrypt
             else:
                 raise HashError("Hash type must be 'sha512', "
                                 "'sha1' or 'bcrypt'")
@@ -186,7 +186,7 @@ class DBAuth(object):
 
         # Auto-update the password hash to the current algorithm
         hashtype, n, salt = _split_password(user.user_password)
-        if (hashtype != self.config.hash) or (n != self.config.hash_depth):
+        if (hashtype != self.config.hash_type) or (n != self.config.hash_depth):
             self.set_password(login, password)
 
         del user['user_password']
@@ -250,7 +250,7 @@ class DBAuth(object):
             password = password.strip()
             if len(password) < self.config.password_minlen:
                 raise AuthError('bad password')
-            hashed = self.hash(password)
+            hashed = self.hash_func(password)
 
         user_id = self.db.insert('user',
                                  user_login=login,
@@ -272,7 +272,7 @@ class DBAuth(object):
         if not password:
             hashed = UNUSABLE_PASSWORD
         else:
-            hashed = self.hash(password.strip())
+            hashed = self.hash_func(password.strip())
 
         self.db.update('user',
                        user_password=hashed,

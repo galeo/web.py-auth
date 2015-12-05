@@ -245,7 +245,7 @@ By default the system will map a **login**, **logout** and **password-reset** pa
 ## Settings
 
 <dl>
-<dt>hash = 'sha512'</dt>
+<dt>hash_type = 'sha512'</dt>
 <dd>
 Either <strong>sha1</strong>, <strong>sha512 (default)</strong> or <strong>bcrypt</strong> — the algorithm used to perform a one-way hash of the password. Note that <strong>bcrypt</strong> is only supported on platforms that have the Python <a href="http://www.mindrot.org/projects/py-bcrypt/">py-bcrypt</a> module available.
 </dd>
