@@ -85,7 +85,7 @@ It also includes default pages to login, generate a password-reset token, email 
 
 ## Usage
 
-Once you have an **DBAuth** instance a number of methods are available on that object:
+Once you initiated the **auth** application a number of methods are available:
 
 <dl>
 <dt>@auth.protected(**pars)</dt>
@@ -95,7 +95,7 @@ Examples:<br>
 
 Limiting access to authenticated users
 <pre>
-class somePage:
+class SomePage:
     <strong>@auth.protected()</strong>
     def GET(self):
         ...
@@ -104,7 +104,7 @@ class somePage:
 Limiting access to users with a specific permission
 
 <pre>
-class somePage:
+class SomePage:
     <strong>@auth.protected(perm='can_edit')</strong>
     def GET(self):
         ...
@@ -116,7 +116,7 @@ Limiting access to users who pass a test
 def over18(user):
     return user.age > 18</strong>
 
-class somePage:
+class SomePage:
     <strong>@auth.protected(test=over18)</strong>
     def GET(self):
         ...
@@ -125,7 +125,7 @@ class somePage:
 Limiting access to users who need to pass the CAPTCHA validation
 
 <pre>
-class somePage:
+class SomePage:
     <strong>@auth.protected(captcha_on=True)</strong>
     def GET(self):
         ...
@@ -239,7 +239,7 @@ A login form to be used inside other pages (like the home page).
 
 ## Automatic views
 
-By default the system will map a login, logout and password-reset pages. This can be disabled in the settings.
+By default the system will map a **login**, **logout** and **password-reset** pages. This can be disabled in the settings.
 
 
 ## Settings
