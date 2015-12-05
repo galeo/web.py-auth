@@ -9,6 +9,9 @@ from hashlib import sha1 as sha
 import web
 
 
+__all__ = ["make_token", "check_token"]
+
+
 def make_token(user):
     """Returns a token that can be used once to do a password reset
     for the given user.

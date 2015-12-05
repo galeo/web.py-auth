@@ -49,7 +49,7 @@ It also includes default pages to login, generate a password-reset token, email 
 
     ```python
     import web
-    from web.contrib.auth import DBAuth
+    from web.contrib.auth import auth
 
     urls = (
         '/', 'index',
@@ -58,14 +58,14 @@ It also includes default pages to login, generate a password-reset token, email 
     db = web.database(dbn='mysql', db='webpy', user='scott', pw='tiger')
     settings = {}
 
-    auth = DBAuth(app, db, **settings)
+    auth.init_app(app, db, **settings)
     ```
 
     The system will create and use a **DiskStore** session. If you want to use an existing one or another type of session, you pass it as an argument.
 
     ```python
     mysession = web.session.Session(app, web.session.DiskStore('sessions'))
-    auth = DBAuth(app, db, mysession, **settings)
+    auth.init_app(app, db, mysession, **settings)
     ```
 
 4. Enable CAPTCHA validation
@@ -80,7 +80,7 @@ It also includes default pages to login, generate a password-reset token, email 
        'captcha_image_type': 'png',
    })
 
-   auth = DBAuth(app, db, **settings)
+   auth.init_app(app, db, **settings)
    ```
 
 ## Usage
