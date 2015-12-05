@@ -6,6 +6,8 @@ from datetime import datetime
 
 from hashlib import sha1 as sha
 
+from functools import wraps
+
 import web
 from web import utils
 from web.session import SessionExpired
@@ -124,6 +126,7 @@ class DBAuth(object):
         True or False.
         """
         def decorator(func):
+            @wraps(func)
             def proxyfunc(iself, *args, **kw):
                 try:
                     if pars.get('captcha_on', ''):
