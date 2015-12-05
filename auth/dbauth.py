@@ -144,7 +144,7 @@ class DBAuth(object):
                             raise AuthError
 
                 except (AttributeError, AuthError, SessionExpired):
-                    self.session.next = web.ctx.fullpath
+                    self.session.url_next = web.ctx.fullpath
                     return web.found(self.config.url_login)
                 return func(iself, *args, **kw)
             return proxyfunc

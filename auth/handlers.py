@@ -97,9 +97,9 @@ class Login(object):
             return
         else:
             auth.login(user)
-        next = auth.session.get('next', auth.config.url_after_login)
+        url_next = auth.session.get('url_next', auth.config.url_after_login)
         try:
-            del auth.session['next']
+            del auth.session['url_next']
         except KeyError:
             pass
         try:
@@ -108,7 +108,7 @@ class Login(object):
             del auth.session['captcha_checkcode']
         except KeyError:
             pass
-        web.found(next)
+        web.found(url_next)
         return
 
 
