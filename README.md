@@ -355,3 +355,8 @@ Number of hours than the password-reset token will be valid.
 The password-reset email “From:” header.
 </dd>
 </dl>
+
+
+## License (MIT)
+
+This module is released under the MIT license (MIT), anyone is welcome to contribute.
