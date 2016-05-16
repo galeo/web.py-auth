@@ -104,7 +104,7 @@ class Login(object):
         except KeyError:
             pass
         try:
-            auth.session.captcha_on = False
+            #auth.session.captcha_on = False
             del auth.session['captcha_on']
             del auth.session['captcha_checkcode']
         except KeyError:
