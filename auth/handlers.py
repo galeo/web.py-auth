@@ -54,9 +54,11 @@ class Login(object):
             return
 
         template = template or auth.config.template_login or render.login
+
         auth_error = auth.session.get('auth_error', '')
         if auth_error:
             del auth.session['auth_error']
+
         return template(error=auth_error,
                         captcha_on=auth.session.get('captcha_on', False),
                         url_reset=auth.config.url_reset_token)
@@ -68,11 +70,11 @@ class Login(object):
         i = web.input()
         login = i.get('login', '').strip()
         password = i.get('password', '').strip()
+
         captcha_on = auth.session.get('captcha_on', False)
 
         if captcha_on:
             try:
-                
                 checkcode_input = i.get('captcha').strip().lower()
                 checkcode_session = auth.session.captcha_checkcode.lower()
 
@@ -104,7 +106,7 @@ class Login(object):
         except KeyError:
             pass
         try:
-            #auth.session.captcha_on = False
+            # auth.session.captcha_on = False
             del auth.session['captcha_on']
             del auth.session['captcha_checkcode']
         except KeyError:
@@ -118,6 +120,7 @@ class Captcha(object):
         if ((not auth.config.captcha_enabled) or
                 (not auth.session.get('captcha_on', False))):
             return
+
         try:
             captcha, checkcode = auth.config.captcha_func()
         except (AttributeError, TypeError):
