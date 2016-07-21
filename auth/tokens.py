@@ -5,8 +5,11 @@ reset mechanism.
 """
 
 from time import time
-import sha
+from hashlib import sha1 as sha
 import web
+
+
+__all__ = ["make_token", "check_token"]
 
 
 def make_token(user):
@@ -22,7 +25,7 @@ def check_token(user, token, expire_after):
     """
     # Parse the tokem
     try:
-        ts_b36, hash = token.split("$")
+        ts_b36, hash_code = token.split("$")
     except ValueError:
         return False
 
@@ -51,11 +54,10 @@ def _make_token(user, timestamp):
     # password-- is used.
     # By hashing also a secret key the system cannot be subverted
     # even if the database is compromised.
-    items = [
-        web.config.session_parameters.secret_key,
-        unicode(user.user_id),
-        u'@', user.user_password,
-        unicode(user.user_last_login),
-        unicode(timestamp)]
-    hash = sha.new(''.join(items)).hexdigest()
-    return "%s$%s" % (ts_b36, hash)
+    items = [web.config.session_parameters.secret_key,
+             unicode(user.user_id),
+             u'@', user.user_password,
+             unicode(user.user_last_login),
+             unicode(timestamp)]
+    hash_code = sha(''.join(items)).hexdigest()
+    return "%s$%s" % (ts_b36, hash_code)

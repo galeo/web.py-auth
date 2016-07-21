@@ -9,7 +9,7 @@ import sys
 sys.path.append('..')
 
 import web
-from auth import DBAuth
+from auth import auth
 from initdb import db_path
 
 # db object
@@ -30,7 +30,7 @@ auth_options = {
     'url_after_login': '/hello',
 }
 
-auth = DBAuth(app, db_sqlite, session, **auth_options)
+auth.init_app(app, db_sqlite, session, **auth_options)
 
 
 class Index():
