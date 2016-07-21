@@ -72,6 +72,7 @@ class Login(object):
         password = i.get('password', '').strip()
 
         captcha_on = auth.session.get('captcha_on', False)
+
         if captcha_on:
             try:
                 checkcode_input = i.get('captcha').strip().lower()
@@ -87,12 +88,14 @@ class Login(object):
         user = auth.authenticate(login, password)
         if not user:
             auth.session.auth_error = 'fail'
-            auth.session.captcha_on = True
+            if auth.config.captcha_enabled == True:
+                auth.session.captcha_on = True
             web.found(auth.config.url_login)
             return
         elif user.user_status == 'suspended':
             auth.session.auth_error = 'suspended'
-            auth.session.captcha_on = True
+            if auth.config.captcha_enabled == True:
+                auth.session.captcha_on = True
             web.found(auth.config.url_login)
             return
         else:
