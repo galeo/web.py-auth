@@ -14,6 +14,7 @@ import datetime
 from peewee import Proxy, Model
 from peewee import (
     DateTimeField,
+    TextField,
     CharField,
     PrimaryKeyField,
     ForeignKeyField,
@@ -27,6 +28,17 @@ db_proxy = Proxy()
 class BaseModel(Model):
     class Meta:
         database = db_proxy
+
+
+class Session(BaseModel):
+    """session table for web.py.
+    """
+    atime = DateTimeField(default=datetime.datetime.now)
+    data = TextField(null=True)
+    session_id = CharField(max_length=128, unique=True)
+
+    class Meta:
+        db_table = 'sessions'
 
 
 class User(BaseModel):
